@@ -73,72 +73,72 @@ void Texture2D::Bind(Graphics& gfx, const Resourcedesc* res) noexcept
 	{
 		CreateResourceView(gfx, res->vt);
 	}
-	bindlocation[res->loc] = res->vt;
+	bindlocation[res->loc] = *res;
 	switch (res->loc)
 	{
 	case CS:
-		BindtoCS(gfx, res->vt);
+		BindtoCS(gfx, res);
 		break;
 	case VS:
-		BindtoVS(gfx, res->vt);
+		BindtoVS(gfx, res);
 		break;
 	case PS:
-		BindtoPS(gfx, res->vt);
+		BindtoPS(gfx, res);
 		break;
 	default:
 		break;
 	}
 }
-void  Texture2D::BindtoCS(Graphics& gfx,const ViewType rv) noexcept
+void  Texture2D::BindtoCS(Graphics& gfx, const Resourcedesc* res) noexcept
 {
-	switch (rv)
+	switch (res->vt)
 	{
 	case ShaderResourceView:
-		GetContext(gfx)->CSSetShaderResources(0, 1, &pSRV);
+		GetContext(gfx)->CSSetShaderResources(res->slot, 1, &pSRV);
 		break;
 	case UnorderedAccessView:
-		GetContext(gfx)->CSSetUnorderedAccessViews(0, 1, &pUAV, NULL);
+		GetContext(gfx)->CSSetUnorderedAccessViews(res->slot, 1, &pUAV, NULL);
 		break;
 	case None:
-		GetContext(gfx)->CSSetUnorderedAccessViews(0, 1, &pNullUAV, NULL);
-		GetContext(gfx)->CSSetShaderResources(0, 1, &pNullSRV);
+		GetContext(gfx)->CSSetUnorderedAccessViews(res->slot, 1, &pNullUAV, NULL);
+		GetContext(gfx)->CSSetShaderResources(res->slot, 1, &pNullSRV);
 		break;
 	default:
 		break;
 	}
 }
-void  Texture2D::BindtoVS(Graphics& gfx, const ViewType rv) noexcept
+void  Texture2D::BindtoVS(Graphics& gfx, const Resourcedesc* res) noexcept
 {
-	switch (rv)
+	switch (res->vt)
 	{
 	case ShaderResourceView:
-		GetContext(gfx)->VSSetShaderResources(0, 1, &pSRV);
+		GetContext(gfx)->VSSetShaderResources(res->slot, 1, &pSRV);
 		break;
 	case UnorderedAccessView:
 		//GetContext(gfx)->VSSetUnorderedAccessViews(0, 1, &pBufUAV, NULL);
 		throw "can not bind to VS by UAV";
 		break;
 	case None:
-		GetContext(gfx)->VSSetShaderResources(0, 1, &pNullSRV);
+		GetContext(gfx)->VSSetShaderResources(res->slot, 1, &pNullSRV);
 	default:
 		break;
 	}
 
 
 }
-void  Texture2D::BindtoPS(Graphics& gfx, const ViewType rv) noexcept
+void  Texture2D::BindtoPS(Graphics& gfx, const Resourcedesc* res) noexcept
 {
-	switch (rv)
+	switch (res->vt)
 	{
 	case ShaderResourceView:
-		GetContext(gfx)->PSSetShaderResources(0, 1, &pSRV);
+		GetContext(gfx)->PSSetShaderResources(res->slot, 1, &pSRV);
 		break;
 	case UnorderedAccessView:
 		//GetContext(gfx)->PSSetUnorderedAccessViews(0, 1, &pBufUAV, NULL);
 		throw "can not bind to PS by UAV";
 		break;
 	case None:
-		GetContext(gfx)->PSSetShaderResources(0, 1, &pNullSRV);
+		GetContext(gfx)->PSSetShaderResources(res->slot, 1, &pNullSRV);
 	default:
 		break;
 	}
@@ -146,19 +146,23 @@ void  Texture2D::BindtoPS(Graphics& gfx, const ViewType rv) noexcept
  
 void Texture2D::UnBind(Graphics& gfx) noexcept
 {
-	std::map<LOCATION, ViewType>::iterator it;
+	std::map<LOCATION, Resourcedesc>::iterator it;
+	Resourcedesc res;
+	res.vt = None;
+	
 	for (it = bindlocation.begin(); it != bindlocation.end(); ++it)
 	{
+		res.slot = it->second.slot;
 		switch (it->first)
 		{
 		case CS:
-			BindtoCS(gfx, None);
+			BindtoCS(gfx, &res);
 			break;
 		case VS:
-			BindtoVS(gfx, None);
+			BindtoVS(gfx, &res);
 			break;
 		case PS:
-			BindtoPS(gfx, None);
+			BindtoPS(gfx, &res);
 			break;
 		default:
 			break;

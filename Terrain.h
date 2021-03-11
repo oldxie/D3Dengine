@@ -14,11 +14,11 @@ class Terrain : public Drawable
 		~Terrain();
 		void Generate(Graphics& gfx);
 
-		void Update(float dt) noexcept;
+		void Update(float dt, Graphics& gfx) noexcept;
 		XMMATRIX GetTransformXM() const noexcept override;
 	
-		//void DeferDraw(Graphics& gfx) const noexcept;
-		void Draw(Graphics& gfx) const noexcept;
+		void ShowTexture(Graphics& gfx) const noexcept;
+
 	public:
 		int MeshSize;
 		int MeshLength;
@@ -43,12 +43,7 @@ private:
 	std::vector<std::unique_ptr<Bindable>> heightmapbinds;
 	std::unordered_map<UINT,std::vector<std::unique_ptr<Bindable>>> PassBindList;
 public:
-	void AddComputerBind(std::unique_ptr<Bindable> bind)noexcept;
-	void AddHeightMapBind(std::unique_ptr<Bindable> bind)noexcept;
-	void AddtoPassBind(std::unique_ptr<Bindable> bind, UINT passnum)noexcept;
-	void AddtoResourceMap(std::unique_ptr<Bindable> bind, Mapinfo mapinfo)noexcept;
 
-	UINT pass_num = 0;
 	struct Parameters{
 
 		float time = 0.0f;
@@ -56,13 +51,25 @@ public:
 		float speed = 1.0f;
 		float freq = 1.0f;
 		XMFLOAT4 WindAndSeed;
+		UINT Ns;
+		float BubblesScale =1.0f;	    //泡沫强度
+		float BubblesThreshold=1.0f; //泡沫阈值
 	};
 	Parameters parm;
+	struct Windowparm {
+		float colormax = 0.25f;
+		float colorscale = 12.0f;
+	};
+	Windowparm windowparm;
+
 	D3D11_VIEWPORT vp[2];
 	ID3D11DepthStencilState* DepthStencilState = NULL;
 	ID3D11DepthStencilState* DepthStencilStateHeight = NULL;
 	ID3D11SamplerState*      g_pSamplerLinear = NULL;
 	ID3D11Buffer* HeightBuffer;
-	std::map<UINT16,std::unique_ptr<subWin>> TextureShowList;
+	std::map<LPCSTR,std::unique_ptr<subWin>> TextureShowList;
 	//std::vector<UINT> showtextureID;
+	ID3D11ShaderResourceView*           g_sky = NULL;
+private:
+	void computeFFT(Graphics& gfx ,LPCSTR kernel, LPCSTR input);
 };

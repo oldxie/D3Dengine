@@ -3,32 +3,47 @@
 #include "IndexBuffer.h"
 #include <cassert>
 #include <typeinfo>
+#include <string.h>
 
-void Drawable::Draw(Graphics& gfx) const noexcept
+void Drawable::Submit(Graphics& gfx) const noexcept
 {
-	for (auto& b : binds)
+	for (UINT16 passnum = 0; passnum < passdescs.size(); passnum++)
 	{
-		b->Bind(gfx);
+		for (auto& desc : passdescs.at(passnum).binddescs)
+		{
+			binds.at(desc.resindex)->Bind(gfx, &desc.res);
+		}
+		//DrawDesc drawdesc = passdescs.at(passnum).drawdescs;
+		if (passdescs.at(passnum).drawdescs.vp != NULL)
+		{	
+			gfx.m_pImmediateContext->RSSetViewports(1, passdescs.at(passnum).drawdescs.vp);
+			gfx.SetCullMode(passdescs.at(passnum).drawdescs.cullmode);
+		}
+		switch (passdescs.at(passnum).drawdescs.drawtype)
+		{
+		case dispatch :
+			gfx.Dispatch(passdescs.at(passnum).drawdescs.drawsize.dispatch_x, passdescs.at(passnum).drawdescs.drawsize.dispatch_y, passdescs.at(passnum).drawdescs.drawsize.dispatch_z);
+			break;
+		case draw : 
+			gfx.SimpleDraw(passdescs.at(passnum).drawdescs.drawsize.vertexsize);
+			break;
+		case drawindex:
+		case drawauto:
+		default:
+			break;
+		}
+
+		for (auto& desc : passdescs.at(passnum).binddescs)
+		{
+			binds.at(desc.resindex)->UnBind(gfx);
+		}
 	}
-	gfx.DrawIndexed(pIndexBuffer->GetCount());
+	
 }
 
-void Drawable::DrawtoSub(Graphics& gfx , UINT vp_index) const noexcept
+void Drawable::BindtoUpdate(ResouceID resid) noexcept
 {
-	for (auto& b : binds)
-	{
-		b->Bind(gfx);
-	}
-	gfx.DrawIndexedToVP(pIndexBuffer->GetCount(), vp_index);
-}
-
-void Drawable::SimpleDraw(Graphics& gfx, UINT num) const noexcept
-{
-	for (auto& b : binds)
-	{
-		b->Bind(gfx);
-	}
-	gfx.SimpleDraw(num);
+	updateresource=resid;
 }
 
 void Drawable::AddBind(std::unique_ptr<Bindable> bind) noexcept
@@ -44,76 +59,64 @@ void Drawable::AddIndexBuffer(std::unique_ptr<IndexBuffer> ibuf) noexcept
 	binds.push_back(std::move(ibuf));
 }
 
-UINT16 Drawable::AddResourceAndDesc(std::unique_ptr<Bindable> bind, ResourceDesc* ResDesc, UINT16 ResDescSize) noexcept
+void Drawable::CreateResource(LPCSTR resourcename, std::unique_ptr<Bindable> bind)  noexcept
 {
-	if (typeid(*bind) != typeid(IndexBuffer))
+	if (bind == nullptr)
 	{
-		binds.push_back(std::move(bind));
+		resoucemap[resourcename] = nullptr;
+	}
+	else if (typeid(*bind) != typeid(IndexBuffer))
+	{
+		resoucemap[resourcename] = std::move(bind);
 	}
 	else
 	{
 		pIndexBuffer = dynamic_cast<IndexBuffer *> (bind.get());
-		binds.push_back(std::move(bind));
+		resoucemap[resourcename]= std::move(bind);
 	}
-	//PassBindList[passnum].push_back
-	UINT16 resid= binds.size() - 1;
-	if (ResDescSize > 0)
-	{
-		for (UINT16 i = 0; i < ResDescSize; i++)
-		{
-			BindDesc binddesc;
-			binddesc.needlocandvt = true;
-			binddesc.resindex = resid;
-			binddesc.res.loc = ResDesc[i].loc;
-			binddesc.res.vt = ResDesc[i].vt;
-
-			if (binddescs.find(ResDesc[i].passnum) == binddescs.end())
-			{
-				binddescs.insert({ ResDesc[i].passnum ,{ binddesc } });
-			}
-			else
-			{
-				binddescs[ResDesc[i].passnum].push_back(binddesc);
-			}
-		}
-	}	
-	return resid;
 }
-UINT16 Drawable::AddResource(std::unique_ptr<Bindable> bind, UINT16 passnum) noexcept
+void Drawable::SetResource(Graphics& gfx ,LPCSTR resourcename, location loc, ViewType vt, UINT slot)  noexcept
 {
-	if (typeid(*bind) != typeid(IndexBuffer))
-	{
-		binds.push_back(std::move(bind));
-	}
-	else
-	{
-		pIndexBuffer = dynamic_cast<IndexBuffer *> (bind.get());
-		binds.push_back(std::move(bind));
-	}
-	
-			BindDesc binddesc;
-			binddesc.needlocandvt = false;
-			UINT16 resid = binds.size() - 1;
-			binddesc.resindex = resid;
-
-			if (binddescs.find(passnum) == binddescs.end())
-			{
-				binddescs.insert({ passnum ,{ binddesc } });
-			}
-			else
-			{
-				binddescs[passnum].push_back(binddesc);
-			}
-	return resid;
+	ResourceDesc res;
+	res.slot = slot;
+	res.loc = loc;
+	res.vt = vt;
+	resoucemap[resourcename]->Bind(gfx, &res);
+	binddesclist.push_back(resourcename);
 }
-void Drawable::AddResourceByID(UINT16 resid, ResourceDesc* Desc)noexcept
+
+void Drawable::Dispatch(Graphics& gfx,UINT elements_x, UINT elements_y, UINT elements_z) noexcept
 {
-	BindDesc binddesc;
-	binddesc.needlocandvt = false;
-	binddesc.resindex = resid;
-	binddescs[Desc->passnum].push_back(binddesc);
+	gfx.Dispatch(elements_x, elements_y, elements_z);
+	for (auto* resname : binddesclist)
+	{
+		resoucemap[resname]->UnBind(gfx);
+	}
+	binddesclist.clear();
+
 }
 
+void Drawable::Draw(Graphics& gfx, DrawClass drawtype , const D3D11_VIEWPORT *vp ,UINT32 vertexsize, UINT8 cullmode) noexcept
+{
+	gfx.m_pImmediateContext->RSSetViewports(1, vp);
+	gfx.SetCullMode(cullmode);
+	switch (drawtype)
+	{
+	case draw:
+		gfx.SimpleDraw(vertexsize);
+		break;
+	case drawindex:
+	case drawauto:
+	default:
+		break;
+	}
+	for (auto* resname : binddesclist)
+	{
+		resoucemap[resname]->UnBind(gfx);
+	}
+	binddesclist.clear();
+
+}
 XMMATRIX Drawable::GetCameraPos()  const noexcept
 {
 	XMVECTOR Eye = XMVectorSet(100.0f, 100.0f, 100.0f, 0.0f);

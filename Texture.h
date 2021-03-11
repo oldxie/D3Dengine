@@ -23,19 +23,19 @@ public:
 
 	void Bind(Graphics& gfx , const Resourcedesc* res = nullptr) noexcept override;
 	void UnBind(Graphics& gfx) noexcept override;
-	std::map<LOCATION, ViewType> bindlocation;
+	std::map<LOCATION, Resourcedesc> bindlocation;
 	/*void BindtoLation(Graphics& gfx, LOCATION loc, ViewType rv) noexcept
 	{
 		bindlocation[loc] = rv;
 	}*/
 
-	void BindtoCS(Graphics& gfx, const ViewType rv) noexcept;
-	void BindtoVS(Graphics& gfx, const ViewType rv) noexcept;
-	void BindtoPS(Graphics& gfx, const ViewType rv) noexcept;
+	void BindtoCS(Graphics& gfx, const Resourcedesc* res) noexcept;
+	void BindtoVS(Graphics& gfx, const Resourcedesc* res) noexcept;
+	void BindtoPS(Graphics& gfx, const Resourcedesc* res) noexcept;
 
-	void getResource(Graphics& gfx, ID3D11Texture2D* texture)
+	ID3D11Texture2D* getResource()
 	{
-		GetContext(gfx)->CopyResource(pTexture, texture);
+		return pTexture;
 	}
 public:
 	void CreateResourceView(Graphics& gfx, ViewType rv);
