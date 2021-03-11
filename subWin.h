@@ -2,6 +2,8 @@
 #include "Drawable.h"
 #include "BindableBase.h"
 #include "Bindable.h"
+
+
 class subWin : public Drawable
 {
 public:
@@ -64,7 +66,7 @@ public:
 		
 		//gfx.m_pImmediateContext->OMSetDepthStencilState(NULL, 0);
 	}
-	void Update(float dt) noexcept 
+	void Update(float dt,Graphics& gfx) noexcept
 	{
 	}
 	XMMATRIX subWin::GetTransformXM() const noexcept
@@ -74,6 +76,7 @@ public:
 private:
 	ID3D11DepthStencilState* DepthStencilState = NULL;
 	D3D11_VIEWPORT vp;
+	
 };
 
 

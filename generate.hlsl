@@ -52,7 +52,7 @@ struct HullOut
 [outputtopology("triangle_cw")]
 [outputcontrolpoints(4)]
 [patchconstantfunc("ConstantHS")]
-[maxtessfactor(64.0f)]
+[maxtessfactor(64.0)]
 HullOut HS(InputPatch<VertexOut, 4> p,
 	uint i : SV_OutputControlPointID,
 	uint patchId : SV_PrimitiveID)
@@ -67,6 +67,7 @@ HullOut HS(InputPatch<VertexOut, 4> p,
 struct DomainOut
 {
 	float4 PosL : SV_POSITION;
+	//float2 uv : TEXCOORD0;
 };
 
 // The domain shader is called for every vertex created by the tessellator.  
@@ -82,6 +83,7 @@ DomainOut DS(PatchTess patchTess,
 	float3 v2 = lerp(quad[2].PosL, quad[3].PosL, uv.x);
 	float3 pos = lerp(v1, v2, uv.y);
 	dout.PosL = float4(pos, 1.0f);
+	//dout.uv = uv;
 	//dout.PosH=mul(float4(pos, 1.0f), transform);
 	//dout.PosL = pos;
 	return dout;

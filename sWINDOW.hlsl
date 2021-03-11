@@ -1,5 +1,10 @@
 Texture2D txDiffuse : register(t0);
 SamplerState samLinear : register(s0);
+cbuffer ConstantBuffer : register(b0)
+{	
+	float colormax;
+	float colorscale;
+}
 
 struct ps_input
 {
@@ -33,5 +38,9 @@ else if (vertexId == 3) {
 
 float4 PS(ps_input input) : SV_Target
 {
-	return txDiffuse.Sample(samLinear, input.tex);
+	float4 color = txDiffuse.Sample(samLinear, input.tex);
+	color.x = color.x * colorscale + colormax;
+	color.y = color.y * colorscale + colormax;
+	color.z = color.z * colorscale + colormax;
+	return color;
 }

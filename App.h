@@ -29,7 +29,7 @@ private:
 	ImguiManager imgui;
 	std::string commandline;
 	Window wnd;
-	std::vector<std::unique_ptr<FreeObject>> FreeObjectList;
+	//std::vector<std::unique_ptr<FreeObject>> FreeObjectList;
 	std::vector<std::unique_ptr<Terrain>> TerrainList;
 	ChiliTimer timer;
 	void CameraControl();

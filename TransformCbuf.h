@@ -10,6 +10,16 @@ public:
 	void Bind(Graphics& gfx, const Resourcedesc* res = nullptr) noexcept override;
 	void UnBind(Graphics& gfx) noexcept override {}
 private:
-	VertexConstantBuffer<XMMATRIX> vcbuf;
+	struct Cameramatrix
+	{
+		XMMATRIX MVP;
+		XMMATRIX M;
+		XMMATRIX V;
+		XMMATRIX P;
+		XMVECTOR POS;
+	};
+	Cameramatrix trans;
+	VertexConstantBuffer<Cameramatrix> vcbuf;
+	PixelConstantBuffer<Cameramatrix> pcbuf;
 	const Drawable& parent;
 };

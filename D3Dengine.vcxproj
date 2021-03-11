@@ -397,7 +397,6 @@
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="PixelShader.cpp" />
     <ClCompile Include="Drawable.cpp" />
-    <ClCompile Include="FreeObject.cpp" />
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
     <ClCompile Include="Terrain.cpp" />
@@ -417,7 +416,6 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ComputeShader.h" />
     <ClInclude Include="ConstantBuffers.h" />
-    <ClInclude Include="FreeObject.h" />
     <ClInclude Include="GeometryShader.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="ImguiManager.h" />

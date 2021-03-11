@@ -11,6 +11,7 @@ public:
 	Camera();
 	~Camera() {};
 	XMMATRIX GetTransMatrix();
+	XMVECTOR GetCameraPos();
 	void CameraUpdate(char key);
 	void Reset() noexcept
 	{

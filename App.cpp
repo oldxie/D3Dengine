@@ -10,7 +10,7 @@ App::App( const std::string& commmandline)
 	wnd(1080,720)
 {
 
-	 TerrainList.push_back(std::make_unique<Terrain>(40, 128, wnd.Gfx()));
+	 TerrainList.push_back(std::make_unique<Terrain>(128, 128, wnd.Gfx()));
 	 //Camera Projection
 	 //wnd.Gfx().SetCamera();
 	 wnd.Gfx().SetProjection(XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 200.0f));
@@ -56,8 +56,8 @@ void App::DoFrame()
 	
 	for (auto& b : TerrainList)
 	{
-		b->Update(dt);
-		b->Draw(wnd.Gfx());
+		b->Update(dt, wnd.Gfx());
+		b->Submit(wnd.Gfx());
 	}
 	if (ImGui::Begin("info"))
 	{

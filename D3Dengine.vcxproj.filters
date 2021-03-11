@@ -74,9 +74,6 @@
     <ClCompile Include="Drawable.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
-    <ClCompile Include="FreeObject.cpp">
-      <Filter>Source Files\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="Topology.cpp">
       <Filter>Source Files\Bindable</Filter>
     </ClCompile>
@@ -171,9 +168,6 @@
     </ClInclude>
     <ClInclude Include="IndexBuffer.h">
       <Filter>Head Files\Bindable</Filter>
-    </ClInclude>
-    <ClInclude Include="FreeObject.h">
-      <Filter>Head Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="Topology.h">
       <Filter>Head Files\Bindable</Filter>
@@ -270,13 +264,13 @@
     <None Include="generate.hlsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Terrain_pass0.hlsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="TerrainHigh.hlsl">
       <Filter>Shaders</Filter>
     </None>
     <None Include="FFTocean.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Terrain_pass0.hlsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

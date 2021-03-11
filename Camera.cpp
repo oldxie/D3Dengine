@@ -17,6 +17,13 @@ XMMATRIX Camera::GetTransMatrix() {
 		pitch, -yaw, roll
 	);
 };
+XMVECTOR Camera::GetCameraPos()
+{
+	return XMVector3Transform(
+		XMVectorSet(0.0f, 0.0f, -r, 0.0f),
+		XMMatrixRotationRollPitchYaw(phi, -theta, 0.0f)
+	);
+};
 void Camera::CameraUpdate(char key) {
 
 	switch (key)

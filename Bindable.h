@@ -13,6 +13,7 @@ enum Viewtype
 typedef UINT8 LOCATION;
 enum location
 {
+	Nolocation,
 	IB,
 	VS,
 	HS,
@@ -21,10 +22,10 @@ enum location
 	OS,
 	PS,
 	CS,
-};
+	};
 typedef struct Resourcedesc
 {
-	UINT16 passnum;
+	UINT slot;
 	location loc;
 	ViewType vt;
 }ResourceDesc;
